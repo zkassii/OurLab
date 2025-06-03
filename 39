@@ -1,0 +1,86 @@
+Для выполнения вашего задания на WPF с использованием LINQ, следуйте данному примеру:
+
+1. **Создание основного окна с кнопками для перехода к заданиям**. В XAML создайте кнопки, которые будут использовать команду `Navigation.PushAsync(new СтраницаЗадания());`.
+
+```xml
+<Window x:Class="YourNamespace.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Главное окно" Height="350" Width="525">
+    <StackPanel>
+        <Button Content="Задание 1" Click="NavigateToTask1"/>
+        <Button Content="Задание 2" Click="NavigateToTask2"/>
+        <Button Content="Задание 3" Click="NavigateToTask3"/>
+        <!-- Добавьте кнопки для других заданий -->
+    </StackPanel>
+</Window>
+```
+
+2. **Создание страницы задания**. Создайте новую страницу для задания 3, где будет выполняться LINQ-запрос.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace YourNamespace
+{
+    public partial class TaskPage3 : Page
+    {
+        public TaskPage3()
+        {
+            InitializeComponent();
+            LoadFileData();
+        }
+
+        private void LoadFileData()
+        {
+            string path = "ваш_путь_к_папке"; // Укажите путь к вашей папке
+            DirectoryInfo directory = new DirectoryInfo(path);
+            IEnumerable<FileInfo> files = directory.GetFiles("*", SearchOption.AllDirectories);
+
+            var fileGroups = files
+                .GroupBy(f => f.Extension)
+                .Select(g => new
+                {
+                    Extension = g.Key,
+                    TotalSize = g.Sum(f => f.Length),
+                    MinSize = g.Min(f => f.Length),
+                    MaxSize = g.Max(f => f.Length),
+                    Count = g.Count()
+                }).ToList();
+
+            fileListView.ItemsSource = fileGroups; // Привязываем данные к ListView
+        }
+    }
+}
+```
+
+3. **Создание XAML для страницы задания**. В XAML добавьте элемент `ListView` для отображения данных.
+
+```xml
+<Page x:Class="YourNamespace.TaskPage3"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Задание 3">
+
+    <Grid>
+        <ListView Name="fileListView">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Расширение" DisplayMemberBinding="{Binding Extension}"/>
+                    <GridViewColumn Header="Общий размер (байт)" DisplayMemberBinding="{Binding TotalSize}"/>
+                    <GridViewColumn Header="Минимальный размер (байт)" DisplayMemberBinding="{Binding MinSize}"/>
+                    <GridViewColumn Header="Максимальный размер (байт)" DisplayMemberBinding="{Binding MaxSize}"/>
+                    <GridViewColumn Header="Количество файлов" DisplayMemberBinding="{Binding Count}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Page>
+```
+
+Теперь у вас есть основное окно с кнопками для перехода к заданиям и отдельная страница, которая выполняет LINQ-запрос для получения информации о файлах из указанной папки.
